@@ -5,7 +5,9 @@ VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vedaantees.Framework", "Vedaantees.Framework\Vedaantees.Framework.csproj", "{95FCDC7C-ACDC-4193-B09E-E7B61DDC0AB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vedaantees.Framework.Providers", "Vedaantees.Framework.Providers\Vedaantees.Framework.Providers.csproj", "{6CDC6ECF-A849-48DC-BBF3-9E124E82040E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vedaantees.Framework.Providers", "Vedaantees.Framework.Providers\Vedaantees.Framework.Providers.csproj", "{6CDC6ECF-A849-48DC-BBF3-9E124E82040E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vedaantees.Framework.Tests", "Vedaantees.Framework.Tests\Vedaantees.Framework.Tests.csproj", "{C47276A9-1813-4A2F-BA63-852D36BFF5EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6CDC6ECF-A849-48DC-BBF3-9E124E82040E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CDC6ECF-A849-48DC-BBF3-9E124E82040E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CDC6ECF-A849-48DC-BBF3-9E124E82040E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C47276A9-1813-4A2F-BA63-852D36BFF5EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C47276A9-1813-4A2F-BA63-852D36BFF5EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C47276A9-1813-4A2F-BA63-852D36BFF5EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C47276A9-1813-4A2F-BA63-852D36BFF5EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
