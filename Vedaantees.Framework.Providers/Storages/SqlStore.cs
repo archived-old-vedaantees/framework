@@ -77,8 +77,7 @@ namespace Vedaantees.Framework.Providers.Storages
         public T Get<T>(long id) where T : class, IEntity<long>, new()
         {
             var entity = Set<T>().FirstOrDefault(p=>p.Id==id);
-
-            if(entity==null)
+            if (entity == null)
                 throw new Exception("No entity found for given id.");
 
             return entity;

@@ -80,9 +80,15 @@ namespace Vedaantees.Framework.Tests
         [TestMethod]
         public void TestDelete()
         {
+            TestSqlStoreEntity getEntity = null;
             _sqlStore.Delete<TestSqlStoreEntity>(1);
-            
-            var getEntity = _sqlStore.Get<TestSqlStoreEntity>(1);
+
+            try
+            {
+                getEntity = _sqlStore.Get<TestSqlStoreEntity>(1);
+            }
+            catch{}
+
             Assert.AreEqual(getEntity, null);
         }
         

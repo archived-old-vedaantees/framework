@@ -15,8 +15,6 @@ namespace Vedaantees.Framework.Tests
             var util = new JsonExtensions();
             var keyValues = util.Flatten(json);
             var str = util.Unflatten(keyValues);
-            var obj = JsonConvert.DeserializeObject<Person>(str);
-
             Assert.AreEqual(str, json);
         }
     }
