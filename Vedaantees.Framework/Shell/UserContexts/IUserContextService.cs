@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Vedaantees.Framework.Types.Results;
+using Vedaantees.Framework.Types.Users;
 
 namespace Vedaantees.Framework.Shell.UserContexts
 {

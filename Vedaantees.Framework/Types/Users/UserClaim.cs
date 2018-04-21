@@ -1,4 +1,4 @@
-namespace Vedaantees.Framework.Shell.UserContexts
+namespace Vedaantees.Framework.Types.Users
 {
     public class UserClaim
     {
