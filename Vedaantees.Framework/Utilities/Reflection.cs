@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Vedaantees.Framework.Utilities
 {
-    public static class Reflection
+    public static class ReflectionExtensions
     {
         public static bool IsSubClassOfGeneric(this Type child, Type parent)
         {

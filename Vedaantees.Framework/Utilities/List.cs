@@ -12,7 +12,7 @@ namespace Vedaantees.Framework.Utilities
     /// <summary>
     ///     Extensions for list type collections
     /// </summary>
-    public static class List
+    public static class ListExtensions
     {
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> keySelector)

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Vedaantees.Framework.Utilities
 {
-    public static class String
+    public static class StringExtensions
     {
         public static string ToFirstLower(this string lower)
         {

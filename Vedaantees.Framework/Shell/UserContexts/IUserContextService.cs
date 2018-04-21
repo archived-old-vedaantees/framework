@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Vedaantees.Framework.Types.People;
 using Vedaantees.Framework.Types.Results;
 
 namespace Vedaantees.Framework.Shell.UserContexts
