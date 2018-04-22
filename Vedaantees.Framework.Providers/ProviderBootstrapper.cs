@@ -94,10 +94,10 @@ namespace Vedaantees.Framework.Providers
             return false;
         }
 
-        public static IConfigurationRoot BuildConfiguration(IHostingEnvironment env, string settingsPath)
+        public static IConfigurationRoot BuildConfiguration(IHostingEnvironment env)
         {
             var configurationBuilder = new ConfigurationBuilder()
-                                           .AddJsonFile(settingsPath, false, true)
+                                           .AddJsonFile(GetGlobalSettingsPath(env), false, true)
                                            .SetBasePath(env.ContentRootPath)
                                            .AddJsonFile("appsettings.json", false, true)
                                            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
@@ -105,6 +105,14 @@ namespace Vedaantees.Framework.Providers
             return configurationBuilder.Build();
         }
 
+        private static string GetGlobalSettingsPath(IHostingEnvironment env) => new ConfigurationBuilder()
+                                                                                    .SetBasePath(env.ContentRootPath)
+                                                                                    .AddJsonFile("appsettings.json", false, true)
+                                                                                    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true)
+                                                                                    .Build()
+                                                                                    .GetSection("Global-Settings")?
+                                                                                    .Get<string>();
+        
         public MethodResult Load(IHostingEnvironment env)
         {
             RegisterConfiguration();
@@ -125,7 +133,7 @@ namespace Vedaantees.Framework.Providers
             RegisterUserService();
             RegisterSecurity();
             RegisterRestServices();
-            LoadModules();
+            RegisterModules();
             RegisterRunAfterLoadingIsComplete();
             RegisterTasks();
             RegisterSingleSignOnRegistrar();
@@ -165,7 +173,7 @@ namespace Vedaantees.Framework.Providers
                 _autofacContainerBuilder.RegisterType(definition).As<IRunAfterLoadingIsComplete>();
         }
 
-        private void LoadModules()
+        private void RegisterModules()
         {
             var modules = GetEntitiesInheritingFrom(typeof(IModule));
 
