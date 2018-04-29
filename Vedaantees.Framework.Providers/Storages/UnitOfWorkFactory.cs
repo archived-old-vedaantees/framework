@@ -19,7 +19,7 @@ namespace Vedaantees.Framework.Providers.Storages
         private readonly ILogger _logger;
         private readonly IGraphClientFactory _graphClientFactory;
         
-        public UnitOfWorkFactory(IDocumentStore documentStore, IEnumerable<Type> entities, SqlStoreSetting sqlStoreSetting, ILogger logger, IGraphClientFactory graphClientFactory)
+        public UnitOfWorkFactory(IEnumerable<Type> entities, ILogger logger, IDocumentStore documentStore, SqlStoreSetting sqlStoreSetting, IGraphClientFactory graphClientFactory)
         {
             _documentStore = documentStore;
             _entities = entities;
@@ -30,9 +30,16 @@ namespace Vedaantees.Framework.Providers.Storages
         
         public UnitOfWork Create(IMessageContext messageContext)
         {
-            var uow = new UnitOfWork(new DocumentSessionFactory(_documentStore, _logger, true),
-                                     new SqlStore(_entities, _sqlStoreSetting, true), 
-                                     new GraphStore(_graphClientFactory.Create(), true));
+            var uow = new UnitOfWork();
+
+            if(_documentStore!=null)
+                uow.SetStore(new DocumentSessionFactory(_documentStore, _logger, true));
+
+            if (_sqlStoreSetting != null)
+                uow.SetStore(new SqlStore(_entities, _sqlStoreSetting, true));
+
+            if (_graphClientFactory != null)
+                uow.SetStore(new GraphStore(_graphClientFactory.Create(), true));
 
             messageContext.TransactionContext.Items.GetOrAdd("UnitOfWork", uow);
             return uow;

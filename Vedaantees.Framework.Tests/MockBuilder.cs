@@ -25,7 +25,7 @@ namespace Vedaantees.Framework.Tests
                 {
                     EnableEmail = true,
                     EnableFile = true,
-                    EnableSerilogDebugger = true,
+                    EnableSerilogDebugger = false,
                     LoggingFromEmail = "",
                     LoggingToEmail = ""
                 },

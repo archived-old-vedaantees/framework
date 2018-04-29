@@ -38,6 +38,8 @@ using Serilog;
 using ILogger = Vedaantees.Framework.Providers.Logging.ILogger;
 using Rebus.DataBus;
 using Rebus.DataBus.FileSystem;
+using Rebus.Transport.InMem;
+using Vedaantees.Framework.Providers.Storages.NullStores;
 
 namespace Vedaantees.Framework.Providers
 {
@@ -116,15 +118,15 @@ namespace Vedaantees.Framework.Providers
         public MethodResult Load(IHostingEnvironment env)
         {
             RegisterConfiguration();
-            RegisterLogger(env.ContentRootPath);
-            RegisterDocumentStore();
-            RegisterSqlStore();
-            RegisterGraphStore();
+            var logger = RegisterLogger(env.ContentRootPath);
+            RegisterDocumentStore(logger);
+            RegisterSqlStore(logger);
+            RegisterGraphStore(logger);
             RegisterKeyGenerator();
             RegisterIdHasher();
             RegisterKeyGenerator();
             RegisterEmailServices();
-            RegisterBus();
+            RegisterBus(logger);
             RegisterCommands();
             RegisterEvents();
             RegisterQueries();
@@ -248,66 +250,85 @@ namespace Vedaantees.Framework.Providers
                 }
         }
 
-        private void RegisterBus()
+        private void RegisterBus(ILogger logger)
         {
-            _autofacContainerBuilder.RegisterRebus((configurer, context) => configurer
-                                                                            .Routing(r =>
-                                                                            {
-                                                                                var busSettingsManager = context.Resolve<IBusSettingsManager>();
-                                                                                var commands = GetEntitiesInheritingFrom(typeof(Command));
-                                                                                var registeredCommands = new List<string>();
-                                                                                var routerConfigurationBuilder = r.TypeBased();
+            _autofacContainerBuilder.RegisterRebus((configurer, context) =>
+            {
+                var c = configurer
+                    .Routing(r =>
+                    {
+                        var busSettingsManager = context.Resolve<IBusSettingsManager>();
+                        var commands = GetEntitiesInheritingFrom(typeof(Command));
+                        var registeredCommands = new List<string>();
+                        var routerConfigurationBuilder = r.TypeBased();
 
-                                                                                if (_configuration.Bus.AcceptableCommmandsOrEventsFromNamespacesStartingWith != null &&
-                                                                                    _configuration.Bus.AcceptableCommmandsOrEventsFromNamespacesStartingWith.Any() &&
-                                                                                    !_configuration.Bus.IsSendOnly)
-                                                                                {
-                                                                                    var settings = new CommandSettings();
-                                                                                    var commandsInNamespace = GetEntitiesInheritingFrom(typeof(Command)).Where(p => ContainsNamespace(p.FullName));
+                        if (_configuration.Bus.AcceptableCommmandsOrEventsFromNamespacesStartingWith != null &&
+                            _configuration.Bus.AcceptableCommmandsOrEventsFromNamespacesStartingWith.Any() &&
+                            !_configuration.Bus.IsSendOnly)
+                        {
+                            var settings = new CommandSettings();
+                            var commandsInNamespace = GetEntitiesInheritingFrom(typeof(Command))
+                                .Where(p => ContainsNamespace(p.FullName));
 
-                                                                                    foreach (var command in commandsInNamespace)
-                                                                                    {
-                                                                                        settings.Settings.Add(new CommandSetting
-                                                                                        {
-                                                                                            CommandName = command.FullName,
-                                                                                            Endpoint = $"{_configuration.Bus.Name}"
-                                                                                        });
-                                                                                    }
+                            foreach (var command in commandsInNamespace)
+                            {
+                                settings.Settings.Add(new CommandSetting
+                                {
+                                    CommandName = command.FullName,
+                                    Endpoint = $"{_configuration.Bus.Name}"
+                                });
+                            }
 
-                                                                                    busSettingsManager.UpdateCommandSettings(settings);
-                                                                                }
-                                                                                
-                                                                                var commandSettings = busSettingsManager.GetCommandSettings() ?? new CommandSettings();
+                            busSettingsManager.UpdateCommandSettings(settings);
+                        }
 
-                                                                                foreach (var command in commands)
-                                                                                {
-                                                                                    if (registeredCommands.Contains(command.FullName))
-                                                                                        continue;
+                        var commandSettings = busSettingsManager.GetCommandSettings() ?? new CommandSettings();
 
-                                                                                    registeredCommands.Add(command.FullName);
-                                                                                    var endpoint = commandSettings.Settings.FirstOrDefault(p => p.CommandName == command.FullName);
+                        foreach (var command in commands)
+                        {
+                            if (registeredCommands.Contains(command.FullName))
+                                continue;
 
-                                                                                    if (endpoint != null)
-                                                                                        routerConfigurationBuilder = routerConfigurationBuilder.Map(command, endpoint.Endpoint);
-                                                                                }
-                                                                            })
-                                                                            .Logging(l => l.Serilog(Log.Logger))
-                                                                            .Options(o =>
-                                                                            {
-                                                                                    var unitOfWork = new UnitOfWorkFactory(context.Resolve<Raven.Client.Documents.IDocumentStore>(),
-                                                                                                                           GetEntitiesInheritingFrom(typeof(IEntity<long>)),
-                                                                                                                           _configuration.SqlStore,
-                                                                                                                           context.Resolve<ILogger>(),
-                                                                                                                           context.Resolve<IGraphClientFactory>());
+                            registeredCommands.Add(command.FullName);
+                            var endpoint =
+                                commandSettings.Settings.FirstOrDefault(p => p.CommandName == command.FullName);
 
-                                                                                    o.EnableUnitOfWork(unitOfWork.Create, unitOfWork.Commit, cleanupAction: unitOfWork.Cleanup);
-                                                                                    o.EnableDataBus().StoreInFileSystem(_configuration.Bus.SharedFilePath);
-                                                                            })
-                                                                            .Transport(t => t.UseRabbitMq(_configuration.Bus.Endpoint, _configuration.Bus.Name))
-                                                                                                .Options(o => {
-                                                                                                                o.SetNumberOfWorkers(2);
-                                                                                                                o.SetMaxParallelism(30);
-                                                                                                            }));
+                            if (endpoint != null)
+                                routerConfigurationBuilder = routerConfigurationBuilder.Map(command, endpoint.Endpoint);
+                        }
+                    })
+                    .Logging(l => l.Serilog(Log.Logger))
+                    .Options(o =>
+                    {
+                        var isDocumentStoreRegistered = context.IsRegistered<Raven.Client.Documents.IDocumentStore>();
+                        var isSqlStoreRegistered = context.IsRegistered<ISqlStore>() &&
+                                                   !(context.Resolve<ISqlStore>() is NullSqlStore);
+                        var isGraphStoreRegistered = context.IsRegistered<IGraphClientFactory>();
+
+                        var unitOfWork = new UnitOfWorkFactory(GetEntitiesInheritingFrom(typeof(IEntity<long>)),
+                            context.Resolve<ILogger>(),
+                            isDocumentStoreRegistered ? context.Resolve<Raven.Client.Documents.IDocumentStore>() : null,
+                            isSqlStoreRegistered ? _configuration.SqlStore : null,
+                            isGraphStoreRegistered ? context.Resolve<IGraphClientFactory>() : null);
+
+                        o.EnableUnitOfWork(unitOfWork.Create, unitOfWork.Commit, cleanupAction: unitOfWork.Cleanup);
+                        o.EnableDataBus().StoreInFileSystem(_configuration.Bus.SharedFilePath);
+                    })
+                    .Options(o =>
+                    {
+                        o.SetNumberOfWorkers(2);
+                        o.SetMaxParallelism(30);
+                    });
+                
+                var verifier = new ProviderVerifier();
+
+                if (!string.IsNullOrEmpty(_configuration.Bus.Endpoint) && verifier.IsQueueRunning(_configuration.Bus.Endpoint, logger))
+                    c.Transport(t => t.UseRabbitMq(_configuration.Bus.Endpoint, _configuration.Bus.Name));
+                else
+                    c.Transport(t => t.UseInMemoryTransport(new InMemNetwork(), _configuration.Bus.Name));
+                
+                return c;
+            });
 
 
             _autofacContainerBuilder.RegisterInstance(_configuration.Bus);
@@ -351,21 +372,19 @@ namespace Vedaantees.Framework.Providers
                              .SingleInstance();
         }
 
-        private void RegisterDocumentStore()
+        private void RegisterDocumentStore(ILogger logger)
         {
-            _autofacContainerBuilder.Register(ctx =>
-                                {
-                                    var documentStore = new Raven.Client.Documents.DocumentStore
-                                    {
-                                        Urls = new []{ _configuration.DocumentStore.Url }
-                                    };
-
-                                    documentStore.Conventions.IdentityPartsSeparator = "-";
-                                    documentStore.Initialize();
-                                    return documentStore;
-
-                                }).As<Raven.Client.Documents.IDocumentStore>()
-                                  .SingleInstance();
+            var verifier = new ProviderVerifier();
+            if (_configuration.DocumentStore==null || string.IsNullOrEmpty(_configuration.DocumentStore?.Url) || !verifier.IsNoSqlServiceRunning(_configuration.DocumentStore?.Url, 
+                                                                                                                                        _configuration.DocumentStore?.Username, 
+                                                                                                                                        _configuration.DocumentStore?.Password, 
+                                                                                                                                        logger))
+            {
+                _autofacContainerBuilder.RegisterType<NullDocumentStore>()
+                                        .As<IDocumentStore>()
+                                        .SingleInstance();
+                return;
+            }
 
             _autofacContainerBuilder.Register(ctx =>
             {
@@ -384,25 +403,48 @@ namespace Vedaantees.Framework.Providers
                              .As<IDocumentStore>()
                              .InstancePerDependency();
         }
-        
-        private void RegisterSqlStore()
+                
+        private void RegisterSqlStore(ILogger logger)
         {
-            _autofacContainerBuilder.Register(ctx =>
+            var verifier = new ProviderVerifier();
+            if (_configuration.SqlStore == null || string.IsNullOrEmpty(_configuration.SqlStore?.ConnectionString) || !verifier.IsSqlServiceRunning(_configuration.SqlStore?.ConnectionString, logger))
             {
-                var transactionContext = AmbientTransactionContext.Current;
-                var unitOfWork = (UnitOfWork)transactionContext?.Items["UnitOfWork"];
+                _autofacContainerBuilder.RegisterType<NullSqlStore>()
+                    .As<ISqlStore>()
+                    .SingleInstance();
+                return;
+            }
 
-                if (unitOfWork != null)
-                    return unitOfWork.SqlStore;
+            _autofacContainerBuilder.Register(ctx =>
+                            {
+                                var transactionContext = AmbientTransactionContext.Current;
+                                var unitOfWork = (UnitOfWork)transactionContext?.Items["UnitOfWork"];
 
-                return new SqlStore(GetEntitiesInheritingFrom(typeof(IEntity<long>)), _configuration.SqlStore, false);
-            })
+                                if (unitOfWork != null)
+                                    return unitOfWork.SqlStore;
+
+                                return new SqlStore(GetEntitiesInheritingFrom(typeof(IEntity<long>)), _configuration.SqlStore, false);
+                            })
                              .As<ISqlStore>()
                              .InstancePerLifetimeScope();
         }
-
-        private void RegisterGraphStore()
+        
+        private void RegisterGraphStore(ILogger logger)
         {
+            var verifier = new ProviderVerifier();
+            if (_configuration.GraphStore == null || 
+                string.IsNullOrEmpty(_configuration.GraphStore?.Url) || 
+                !verifier.IsGraphServiceRunning(_configuration.GraphStore?.Url,
+                                                _configuration.GraphStore?.Username,
+                                                _configuration.GraphStore?.Password,
+                                                logger))
+            {
+                _autofacContainerBuilder.RegisterType<NullGraphStore>()
+                                        .As<IGraphStore>()
+                                        .SingleInstance();
+                return;
+            }
+
             _autofacContainerBuilder.Register(context => NeoServerConfiguration.GetConfiguration(new Uri($"{_configuration.GraphStore.Url}/db/data"),
                                                                                                             _configuration.GraphStore.Username,
                                                                                                             _configuration.GraphStore.Password))
@@ -424,10 +466,11 @@ namespace Vedaantees.Framework.Providers
                                     .InstancePerLifetimeScope();
         }
 
-        private void RegisterLogger(string logPath)
+        private ILogger RegisterLogger(string logPath)
         {
             var instance = new Logger(_configuration.Logging, _configuration.AppName, _configuration.Emails, logPath);
             _autofacContainerBuilder.RegisterInstance(instance).As<ILogger>();
+            return instance;
         }
 
         private void RegisterQueries()

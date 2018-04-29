@@ -4,10 +4,18 @@ namespace Vedaantees.Framework.Providers.Storages
 {
     public class UnitOfWork
     {
-        public UnitOfWork(DocumentSessionFactory documentSessionFactory, SqlStore sqlStore, GraphStore graphStore)
+        public void SetStore(DocumentSessionFactory documentSessionFactory)
         {
             DocumentSessionFactory = documentSessionFactory;
+        }
+
+        public void SetStore(SqlStore sqlStore)
+        {
             SqlStore = sqlStore;
+        }
+
+        public void SetStore(GraphStore graphStore)
+        {
             GraphStore = graphStore;
         }
 

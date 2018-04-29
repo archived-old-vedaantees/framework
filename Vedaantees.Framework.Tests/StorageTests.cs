@@ -1,5 +1,6 @@
 ﻿using Vedaantees.Framework.Providers.Storages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Vedaantees.Framework.Providers.Storages.Sessions;
 
 namespace Vedaantees.Framework.Tests
 {
@@ -10,8 +11,9 @@ namespace Vedaantees.Framework.Tests
         public void TestGenerateKey()
         {
             var configuration = MockBuilder.BuildConfiguration();
-            var documentStore = new Raven.Client.Documents.DocumentStore { Urls = new []{ configuration.DocumentStore.Url }  };
-            documentStore.Initialize();
+            var store = new Raven.Client.Documents.DocumentStore { Urls = new[] { configuration.DocumentStore.Url } };
+            store.Initialize();
+            var documentStore = new DocumentStore(new DocumentSessionFactory(store,new NullLogger(), false), store);
             var generateKey = new GenerateKey(documentStore);
             Assert.IsTrue(generateKey.GetNextNumericalKey("Tests")!=0);
         }

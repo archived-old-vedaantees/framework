@@ -5,9 +5,11 @@ using Vedaantees.Framework.Providers.Storages.Sessions;
 using Vedaantees.Framework.Types.Results;
 using Omu.ValueInjecter;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Commands;
 using Raven.Client.Documents.Session;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
+using Sparrow.Json;
 
 namespace Vedaantees.Framework.Providers.Storages
 {
@@ -110,6 +112,21 @@ namespace Vedaantees.Framework.Providers.Storages
                 _documentStore.Maintenance.Server.Send(createDatabaseOperation);
             }
             return new MethodResult(MethodResultStates.Successful);
+        }
+
+        public long GetNextNumericalKey(string collectionName)
+        {
+            using (var shortTermSingleUse = JsonOperationContext.ShortTermSingleUse())
+            {
+                var command = new NextIdentityForCommand(collectionName);
+                _documentStore.GetRequestExecutor("Master").Execute(command, shortTermSingleUse);
+                return command.Result;
+            }
+        }
+
+        public string GetNextStringKey(string collectionName)
+        {
+            return $"{collectionName}-{GetNextNumericalKey(collectionName)}";
         }
     }
 }

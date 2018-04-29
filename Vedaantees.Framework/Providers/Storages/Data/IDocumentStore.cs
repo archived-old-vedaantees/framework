@@ -14,5 +14,7 @@ namespace Vedaantees.Framework.Providers.Storages.Data
         T First<T>() where T : class, IEntity<string>, new();
         IQueryable<T> Find<T>(Expression<Func<T, bool>> expression = null) where T : class, IEntity<string>, new();
         MethodResult CreateDatabase(string databaseName);
+        long GetNextNumericalKey(string collectionName);
+        string GetNextStringKey(string collectionName);
     }
 }

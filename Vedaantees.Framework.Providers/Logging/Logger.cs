@@ -40,7 +40,7 @@ namespace Vedaantees.Framework.Providers.Logging
                 Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
             }
 
-            if(settings.EnableFile)
+            if (settings.EnableFile)
                 seriLogConfig.WriteTo.RollingFile($@"{_path}\logs\log-{{Date}}.txt");
             
             if (settings.EnableEmail && emailSettings != null && !string.IsNullOrEmpty(settings.LoggingFromEmail) && !string.IsNullOrEmpty(settings.LoggingToEmail))
