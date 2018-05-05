@@ -1,0 +1,17 @@
+<mat-toolbar color="primary">
+    <span>MyCompany</span>
+    <span class="fill-space"></span>
+    <button mat-button [matMenuTriggerFor]="appMenu"><mat-icon class="menu"></mat-icon> Menu</button>
+</mat-toolbar>
+
+<mat-menu #appMenu="matMenu">
+  <button mat-menu-item> Settings </button>
+  <button mat-menu-item> Help </button>
+</mat-menu>
+
+<style>
+
+.fill-space{
+    flex: 1 1 auto;
+}
+</style>
