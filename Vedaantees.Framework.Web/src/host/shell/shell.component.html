@@ -1,17 +1,16 @@
-<mat-toolbar color="primary">
-    <span>MyCompany</span>
+<mat-toolbar color="primary" class="mat-elevation-z3">
+    <button mat-button (click)="siteNav.toggle()">Aware</button>
     <span class="fill-space"></span>
-    <button mat-button [matMenuTriggerFor]="appMenu"><mat-icon class="menu"></mat-icon> Menu</button>
+    <button mat-mini-fab (click)="siteRightNav.toggle()"><mat-icon>menu</mat-icon></button>
 </mat-toolbar>
 
-<mat-menu #appMenu="matMenu">
-  <button mat-menu-item> Settings </button>
-  <button mat-menu-item> Help </button>
-</mat-menu>
-
-<style>
-
-.fill-space{
-    flex: 1 1 auto;
-}
-</style>
+<mat-drawer-container [hasBackdrop]="true">
+    <mat-drawer mode="over" #siteNav>Start</mat-drawer>
+    <mat-drawer mode="over" #siteRightNav position="end">Right</mat-drawer>
+    <mat-drawer-content class="container" fxLayout="row" fxLayout.xs="column" fxLayoutWrap fxLayoutAlign="center" height="100%">
+        <div fxFlex="100%">
+                Content
+                <router-outlet></router-outlet>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>
