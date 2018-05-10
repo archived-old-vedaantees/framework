@@ -1,16 +1,18 @@
-<mat-toolbar color="primary" class="mat-elevation-z3">
-    <button mat-button (click)="siteNav.toggle()">Aware</button>
-    <span class="fill-space"></span>
-    <button mat-mini-fab (click)="siteRightNav.toggle()"><mat-icon>menu</mat-icon></button>
-</mat-toolbar>
+<div id="shell">
+    <mat-toolbar id="site-toolbar" color="primary" #siteToolbar class="md-elevation-z1">
+        <button  id="site-title"   mat-button (click)="siteLeftNav.toggle()">{{moduleName}}</button>
+        <span class="fill-space"></span>
+        <button class ="site-toolbar-button" mat-button (click)="siteRightNav.toggle()" ><mat-icon>menu</mat-icon></button>
+        <button class ="site-toolbar-button" mat-button (click)="siteRightNav.toggle()" ><mat-icon>label</mat-icon></button>
+    </mat-toolbar>
 
-<mat-drawer-container [hasBackdrop]="true">
-    <mat-drawer mode="over" #siteNav>Start</mat-drawer>
-    <mat-drawer mode="over" #siteRightNav position="end">Right</mat-drawer>
-    <mat-drawer-content class="container" fxLayout="row" fxLayout.xs="column" fxLayoutWrap fxLayoutAlign="center" height="100%">
-        <div fxFlex="100%">
-                Content
+    <mat-drawer-container [hasBackdrop]="true" #siteContent>
+        <mat-drawer mode="over" #siteLeftNav>Start</mat-drawer>
+        <mat-drawer mode="over" position="end" #siteRightNav>Right</mat-drawer>
+        <mat-drawer-content class="container"  fxLayout="row" fxLayout.xs="column" fxLayoutAlign="center" height="100%" fxLayoutWrap>
+            <div fxFlex="100%">
                 <router-outlet></router-outlet>
-        </div>
-    </mat-drawer-content>
-</mat-drawer-container>
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

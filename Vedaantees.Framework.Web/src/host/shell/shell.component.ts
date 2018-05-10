@@ -6,5 +6,10 @@ import { Component } from '@angular/core';
 })
 export class ShellComponent 
 {
-  title = 'Hello World - 1';
+    moduleName:string;
+
+    constructor()
+    {
+      this.moduleName = "Aware";
+    }
 }
