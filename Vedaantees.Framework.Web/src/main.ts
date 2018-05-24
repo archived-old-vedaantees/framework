@@ -1,12 +1,11 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
 import { ShellModule } from './app/shell/shell.module';
 import { environment } from './environments/environment';
 
-if (environment.production) {
+if (environment.production)
   enableProdMode();
-}
 
-platformBrowserDynamic().bootstrapModule(ShellModule)
-  .catch(err => console.log(err));
+platformBrowserDynamic()
+        .bootstrapModule(ShellModule)
+        .catch(err => console.log(err));
