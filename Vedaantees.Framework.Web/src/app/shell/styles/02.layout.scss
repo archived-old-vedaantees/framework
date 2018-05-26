@@ -20,7 +20,9 @@
             letter-spacing: 0.1;
             background-color:mat-color(map-get($theme, accent));
             padding:0;
-            font-size:1.05em;
+            font-size:0.9em;
+            padding-left:10px;
+            padding-right:10px;
         }
     
         .site-toolbar-button

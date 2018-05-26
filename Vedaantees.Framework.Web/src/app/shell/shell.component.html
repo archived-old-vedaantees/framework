@@ -1,6 +1,6 @@
 <mat-sidenav-container id="site-content" fullscreen>
     <mat-sidenav mode="over" #leftSideNav>
-        Left
+        <ng-content select="[left-nav]"></ng-content>
     </mat-sidenav>
 
     <mat-sidenav mode="over" #rightSideNav position="end">
@@ -8,8 +8,8 @@
     </mat-sidenav>
 
     <mat-sidenav-content>
-        <mat-toolbar color="primary" id="site-toolbar">
-            <button mat-button id="site-title" (click)="leftSideNav.toggle()">Title</button>
+        <mat-toolbar color="primary" id="site-toolbar" class="mat-elevation-z2">
+            <button mat-button id="site-title" (click)="leftSideNav.toggle()">{{title}}</button>
             <ng-content select="[left-toolbar-nav]"></ng-content>
             <span class="toolbar-flex-fill"></span>
             <ng-content select="[right-toolbar-nav]"></ng-content>
