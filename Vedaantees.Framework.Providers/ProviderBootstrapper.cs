@@ -386,6 +386,13 @@ namespace Vedaantees.Framework.Providers
                 return;
             }
 
+            var store = new Raven.Client.Documents.DocumentStore { Urls = new[] { _configuration.DocumentStore?.Url } };
+            store.Initialize();
+
+            _autofacContainerBuilder.RegisterInstance<Raven.Client.Documents.DocumentStore>(store)
+                                    .As<Raven.Client.Documents.IDocumentStore>()
+                                    .SingleInstance();
+
             _autofacContainerBuilder.Register(ctx =>
             {
                 var transactionContext = AmbientTransactionContext.Current;

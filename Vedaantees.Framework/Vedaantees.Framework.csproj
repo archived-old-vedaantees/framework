@@ -6,9 +6,9 @@
     <Company>Vedaantees</Company>
     <Product>Framework</Product>
     <Description>Common framework to be used in all modules.</Description>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.2</FileVersion>
-    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.0.6</AssemblyVersion>
+    <FileVersion>1.0.0.6</FileVersion>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
